@@ -34,14 +34,18 @@ def is_valid_new_block(previous_block, new_block):
 
 
 def is_valid_block_structure(block):
-    return (
+    result = (
         type(block.index) is int
         and type(hash) is str
         and type(previous_hash) is str
         and type(timestamp) is float
         and type(data) is bytes
     )
-
+    if result == True:
+        print("Valid block structure")
+    else:
+        print("Not valid block structure")
+    return result
 
 def is_valid_chain(chain):
     def is_valid_genisis(block):
