@@ -3,12 +3,14 @@ import time
 from utils import calculate_hash
 
 class Block:
-    def __init__(self, index, hash, previous_hash, timestamp, data):
+    def __init__(self, index, hash, previous_hash, timestamp, data, difficulty, nonce):
         self.index = index
         self.hash = hash
         self.previous_hash = previous_hash
         self.timestamp = timestamp
         self.data = data
+        self.difficulty = difficulty
+        self.nonce = nonce
 
     def generate_next_block(self, data):
         index = self.index + 1
