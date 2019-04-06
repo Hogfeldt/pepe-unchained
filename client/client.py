@@ -1,11 +1,12 @@
 import socket
 import time
 import json
+from random import randint
 from socket import error as SocketError
 import _thread as thread
 
-from blockchain.block import Block, dict_to_block
-from blockchain.utils import replace_chain
+from blockchain.block import Block, dict_to_block, calculate_hash
+from blockchain.utils import replace_chain, find_block
 
 
 target = "127.0.0.1"
@@ -87,24 +88,45 @@ def worker():
     """ This worker will try to mine a new block until the block is mined og the chain has changed """
     try:
         while True:
-            try:
-                client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                client_socket.connect((target, 9000))
-                # mine chain
-                client_socket.sendall("F".encode())
-                time.sleep(1)
-            except ConnectionRefusedError as e:
-                print(e)
-
-            finally:
-                client_socket.close()
-    except KeyboardInterrupt:
-        client_socket.close()
-
+            latest_block = chain[-1]
+            nonce = randint(0, 2 ** 100)
+            while latest_block == chain[-1]:
+                hash = calculate_hash(
+                    latest_block.index + 1,
+                    latest_block.hash,
+                    "lol catz",
+                    latest_block.difficulty,
+                    nonce,
+                )
+                if hash_matched_difficulty(hash, latest_block.difficulty):
+                    new_block = Block(
+                        latest_block.index + 1,
+                        hash,
+                        latest_block.previous_hash,
+                        time.time(),
+                        "lol catz",
+                        latest_block.difficulty,
+                        nonce,
+                    )
+                    chain.append(new_block)
+                    try: 
+                        for p in peers
+                            connection_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                            connection_socket.connect((p, 9000))
+                            connection_socket.sendall("SIGNAL chain changed\n".encode())
+                            chain_length = "%s\n" % str(len(chain))
+                            connection_socket.sendall(chain_length.encode())
+                            for b in chain:
+                                json_block = "%s\n" % json.dumps(b.__dict__)
+                                connection_socket.sendall(json_block.encode())
+                    finally:
+                        client_socket.close()
+                    break
+                nonce += 1
 
 def get_start_info_from_server():
     """ Ask the content provider for the chain and peers """
-    content_provider = "0.0.0.0"
+    content_provider = "0.0.0.0" # TODO: Fake till you make it
     message_buffer = ""
     peers = []
     chain = []
@@ -142,9 +164,7 @@ def get_start_info_from_server():
         while len([p for p in message_buffer.split("\n") if p]) < peers_length:
             raw_buff = connection_socket, recv(1024)
             message_buffer += raw_buff.decode()
-        peers = [
-            p for p in message_buffer.split("\n") if p != "" and p != MY_IP
-        ]
+        peers = [p for p in message_buffer.split("\n") if p != "" and p != MY_IP]
         return (chain, peers)
     finally:
         client_socket.close()
