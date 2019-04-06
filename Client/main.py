@@ -8,7 +8,8 @@ target = "127.0.0.1"
 
 def listener():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind((target, 9000))
+    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server_socket.bind(('', 9000))
     server_socket.listen(1)
     
     while True:
@@ -27,21 +28,24 @@ def listener():
             clientsocket.close()
 
 def worker():
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    
-    while True:
-        try:
-            client_socket.connect((target, 9000))
-            client_socket.sendall("F".encode())
-            time.sleep(10)
-        except ConnectionRefusedError as e:
-            print(e)
+    try:
+        while True:
+            try:
+                client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                client_socket.connect((target, 9000))
+                client_socket.sendall("F".encode())
+                time.sleep(1)
+            except ConnectionRefusedError as e:
+                print(e)
 
-        finally:
-           client_socket.close()
+            finally:
+               client_socket.close()
+    except KeyboardInterrupt:
+        client_socket.close()
 
 def main():
     thread.start_new_thread(listener, ())
+    time.sleep(2)
     thread.start_new_thread(worker, ())
 
     while True:
