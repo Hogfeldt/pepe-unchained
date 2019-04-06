@@ -5,9 +5,11 @@ from socket import error as SocketError
 import _thread as thread
 
 from blockchain.block import Block, dict_to_block
+from blockchain.utils import replace_chain
 
 
 target = "127.0.0.1"
+MY_IP = "0.0.0.0"
 chain = []
 peers = []
 
@@ -36,14 +38,13 @@ def listener():
                     raw_buff = connection_socket.recv(1024)
                     message_buffer += raw_buff.decode()
                 chain_length = message_buffer.split("\n")[0]
+                message_buffer = message_buffer.split("\n")[1:]
                 while len([b for b in message_buffer.split("\n") if b]) < chain_length:
                     raw_buff = connection_socket.recv(1024)
                     message_buffer += raw_buff.decode()
                 json_blocks = message_buffer.split("\n")[:chain_length]
                 new_chain = [dict_to_block(json.loads(j)) for j in json_blocks]
-                
-                # ask for the new chain
-                pass
+                chain = replace_chain(chain, new_chain)
             elif "GET chain" in request:
                 chain_length = "%s\n" % len(chain)
                 connection_socket.sendall(chain_length.encode())
@@ -51,8 +52,20 @@ def listener():
                     block_to_send = "%s\n" % json.dumps(b.__dict__)
                     connection_socket.sendall(block_to_send.encode())
             elif "SIGNAL peers changed" in request:
-                # ash for new peer list
-                pass
+                while "\n" not in message_buffer:
+                    raw_buff = connection_socket, recv(1024)
+                    message_buffer += raw_buff.decode()
+                peers_length = message_buffer.split("\n")[0]
+                message_buffer = message_buffer.split("\n")[1:]
+                while len([p for p in message_buffer.split("\n") if p]) < peers_length:
+                    raw_buff = connection_socket, recv(1024)
+                    message_buffer += raw_buff.decode()
+                new_peers = [
+                    p for p in message_buffer.split("\n") if p != "" and p != MY_IP
+                ]
+                for p in new_peers:
+                    if p not in peers:
+                        peers.append(p)
             elif "GET peers" in request:
                 peers_length = "%s\n" % len(peers)
                 connection_socket.sendall(peers_length.encode())
@@ -105,19 +118,33 @@ def get_start_info_from_server():
         while "\n" not in message_buffer:
             raw_data = client_socket.recv(1024)
             message_buffer += raw_buff.decode()
-        # TODO: create a constructor for Block taking a json string
+        chain_length = message_buffer.split("\n")[0]
+        message_buffer = message_buffer.split("\n")[1:]
+        while len([b for b in message_buffer.split("\n") if b]) < chain_length:
+            raw_buff = connection_socket.recv(1024)
+            message_buffer += raw_buff.decode()
+        json_blocks = message_buffer.split("\n")[:chain_length]
+        chain = [dict_to_block(json.loads(j)) for j in json_blocks]
         client_socket.close()
+        message_buffer = ""
 
         # Socket setup
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client_socket.connect((content_provider, 9000))
-        # Reauest peers
+        # Request peers
         start_request = "GET peers\n"
         client_socket.sendall(start_request.encode())
         while "\n" not in message_buffer:
             raw_data = client_socket.recv(1024)
             message_buffer += raw_buff.decode()
-        # TODO: create a peers list taking a json string
+        peers_length = message_buffer.split("\n")[0]
+        message_buffer = message_buffer.split("\n")[1:]
+        while len([p for p in message_buffer.split("\n") if p]) < peers_length:
+            raw_buff = connection_socket, recv(1024)
+            message_buffer += raw_buff.decode()
+        peers = [
+            p for p in message_buffer.split("\n") if p != "" and p != MY_IP
+        ]
         return (chain, peers)
     finally:
         client_socket.close()
