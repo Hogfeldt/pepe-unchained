@@ -1,3 +1,3 @@
 # Pepe-unchained
 
-Article for inspiration: https://lhartikk.github.io/
+A blockchain solution for content providers, to engange their users in the releasing process of their content. 
