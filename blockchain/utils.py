@@ -1,18 +1,6 @@
 import hashlib
 
-import genisis
-from block import Block
-
-
-def calculate_hash(index, previous_hash, timestamp, data):
-    return str(
-        hashlib.sha256(
-            str(index).encode()
-            + previous_hash.encode()
-            + str(timestamp).encode()
-            + data
-        ).digest()
-    )
+from block import Block, get_genesis_block, calculate_hash
 
 
 def calculate_hash_for_block(block):
@@ -45,7 +33,7 @@ def is_valid_block_structure(block):
 
 def is_valid_chain(chain):
     def is_valid_genisis(block):
-        return str(block) == str(genesis_block)
+        return str(block) == str(get_genesis_block)
 
     if not is_valid_genisis(chain[0]):
         return False

@@ -1,0 +1,11 @@
+==============================
+= Mining client protocol
+==============================
+
+Chain has changed:
+==================
+SIGNAL chain changed
+
+Get chain:
+==========
+GET chain
