@@ -32,7 +32,7 @@ def listener():
                 raw_buff = connection_socket.recv(1024)
                 message_buffer += raw_buff.decode()
             request = message_buffer.split("\n")[0]
-            message_buffer = "".join(message_buffer.split("\n")[1:])
+            message_buffer = "\n".join(message_buffer.split("\n")[1:])
             print(request)
 
             # Handle request
@@ -41,11 +41,12 @@ def listener():
                     raw_buff = connection_socket.recv(1024)
                     message_buffer += raw_buff.decode()
                 chain_length = int(message_buffer.split("\n")[0])
-                message_buffer = "".join(message_buffer.split("\n")[1:])
+                message_buffer = "\n".join(message_buffer.split("\n")[1:])
                 while len([b for b in message_buffer.split("\n") if b]) < chain_length:
                     raw_buff = connection_socket.recv(1024)
                     message_buffer += raw_buff.decode()
-                json_blocks = message_buffer.split("\n")[:chain_length]
+                json_blocks = message_buffer.split("\n")[: chain_length - 1]
+                print(json_blocks)
                 new_chain = [dict_to_block(json.loads(j)) for j in json_blocks]
                 chain = replace_chain(chain, new_chain)
             elif "GET chain" in request:
@@ -59,7 +60,7 @@ def listener():
                     raw_buff = connection_socket, recv(1024)
                     message_buffer += raw_buff.decode()
                 peers_length = int(message_buffer.split("\n")[0])
-                message_buffer = "".join(message_buffer.split("\n")[1:])
+                message_buffer = "\n".join(message_buffer.split("\n")[1:])
                 while len([p for p in message_buffer.split("\n") if p]) < peers_length:
                     raw_buff = connection_socket, recv(1024)
                     message_buffer += raw_buff.decode()
@@ -151,7 +152,7 @@ def get_start_info_from_server():
             raw_data = client_socket.recv(1024)
             message_buffer += raw_buff.decode()
         chain_length = int(message_buffer.split("\n")[0])
-        message_buffer = "".join(message_buffer.split("\n")[1:])
+        message_buffer = "\n".join(message_buffer.split("\n")[1:])
         while len([b for b in message_buffer.split("\n") if b]) < chain_length:
             raw_buff = connection_socket.recv(1024)
             message_buffer += raw_buff.decode()
@@ -170,7 +171,7 @@ def get_start_info_from_server():
             raw_data = client_socket.recv(1024)
             message_buffer += raw_buff.decode()
         peers_length = int(message_buffer.split("\n")[0])
-        message_buffer = "".join(message_buffer.split("\n")[1:])
+        message_buffer = "\n".join(message_buffer.split("\n")[1:])
         while len([p for p in message_buffer.split("\n") if p]) < peers_length:
             raw_buff = connection_socket, recv(1024)
             message_buffer += raw_buff.decode()

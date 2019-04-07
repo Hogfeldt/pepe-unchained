@@ -78,6 +78,6 @@ GENESIS_BLOCK = Block(
     None,
     1554544077.638083,
     "My genises!!",
-    3,
+    5,
     0,
 )

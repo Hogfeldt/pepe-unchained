@@ -33,7 +33,7 @@ def is_valid_block_structure(block):
 
 def is_valid_chain(chain):
     def is_valid_genisis(block):
-        return str(block) == str(get_genesis_block)
+        return str(block) == str(get_genesis_block())
 
     if not is_valid_genisis(chain[0]):
         return False
@@ -47,19 +47,17 @@ def is_valid_chain(chain):
 def get_accumulated_difficulty(chain):
     return sum([2 ** d for d in [b.difficulty for b in chain]])
 
-
+# we have removed valisation
 def replace_chain(chain, new_chain):
-    if is_valid_chain(new_chain) and get_accumulated_difficulty(
-        new_chain
-    ) > get_accumulated_difficulty(chain):
+    if get_accumulated_difficulty(new_chain) > get_accumulated_difficulty(chain):
         return new_chain
     else:
         return chain
 
 
 def hash_matched_difficulty(hash, difficulty):
-    required_prefix = 0 * difficulty
-    return hash.startswith(str(required_prefix))
+    required_prefix = "0" * difficulty
+    return hash.startswith(required_prefix)
 
 
 def find_block(index, previous_hash, timestamp, data, difficulty):
