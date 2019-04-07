@@ -1,4 +1,5 @@
 import time
+import hashlib
 
 BLOCK_GENERATION_INTERVAL = 10
 
@@ -17,14 +18,16 @@ def get_difficulty_adjustment_interval():
     return DIFFICULTY_ADJUSTMENT_INTERVAL
 
 
-def calculate_hash(index, previous_hash, timestamp, data):
+def calculate_hash(index, previous_hash, timestamp, data, difficulty, nonce):
     return str(
         hashlib.sha256(
             str(index).encode()
             + previous_hash.encode()
             + str(timestamp).encode()
-            + data
-        ).digest()
+            + str(data).encode()
+            + str(difficulty).encode()
+            + str(nonce).encode()
+        ).hexdigest()
     )
 
 
@@ -75,6 +78,6 @@ GENESIS_BLOCK = Block(
     None,
     1554544077.638083,
     "My genises!!",
-    4,
+    3,
     0,
 )

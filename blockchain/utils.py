@@ -59,7 +59,7 @@ def replace_chain(chain, new_chain):
 
 def hash_matched_difficulty(hash, difficulty):
     required_prefix = 0 * difficulty
-    return hash.startswith(required_prefix)
+    return hash.startswith(str(required_prefix))
 
 
 def find_block(index, previous_hash, timestamp, data, difficulty):
